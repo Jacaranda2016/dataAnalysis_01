@@ -6,6 +6,8 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Text, UnicodeText
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sklearn.model_selection import train_test_split
+import csv
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -115,7 +117,89 @@ if __name__ == '__main__':
             user_dict[payment_log.userId].target_label = 1
 
 
+user_dict_paid_1=[]
+user_dict_unpaid_1=[]
+m=0
+n=0
+for user_id in user_dict:
+    if user_dict[user_id].target_label == 1:
+        user_dict_paid_1.append([])
+        user_dict_paid_1[m]=[0,0,0,0,0,0,0,0,0,0]
+        user_dict_paid_1[m][0] = int(user_id)
+        user_dict_paid_1[m][1] = user_dict[user_id].action1_count
+        user_dict_paid_1[m][2] = user_dict[user_id].action2_count
+        user_dict_paid_1[m][3] = user_dict[user_id].action3_count
+        user_dict_paid_1[m][4] = user_dict[user_id].action4_count
+        user_dict_paid_1[m][5] = user_dict[user_id].action5_count
+        user_dict_paid_1[m][6] = user_dict[user_id].action6_count
+        user_dict_paid_1[m][7] = user_dict[user_id].action7_count
+        user_dict_paid_1[m][8] = user_dict[user_id].action8_count
+        user_dict_paid_1[m][9] = user_dict[user_id].target_label
+        m+=1
+    else:
+        user_dict_unpaid_1.append([])
+        user_dict_unpaid_1[n]=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        user_dict_unpaid_1[n][0] = int(user_id)
+        user_dict_unpaid_1[n][1] = user_dict[user_id].action1_count
+        user_dict_unpaid_1[n][2] = user_dict[user_id].action2_count
+        user_dict_unpaid_1[n][3] = user_dict[user_id].action3_count
+        user_dict_unpaid_1[n][4] = user_dict[user_id].action4_count
+        user_dict_unpaid_1[n][6] = user_dict[user_id].action6_count
+        user_dict_unpaid_1[n][7] = user_dict[user_id].action7_count
+        user_dict_unpaid_1[n][8] = user_dict[user_id].action8_count
+        user_dict_unpaid_1[n][9] = user_dict[user_id].target_label
+        n+=1
 
+def print_list(aList):
+    for i in range(0,len(aList)):
+        print(aList[i])
+def delete_userId(aList):
+    for i in range(0, len(aList)):
+        aList[i]=aList[i][1:]
+    return aList
+
+#user_dict_paid_2 = delete_userId(user_dict_paid_1)
+#user_dict_unpaid_2 = delete_userId(user_dict_unpaid_1)
+
+'''
+print_list(user_dict_paid_1)
+print_list(user_dict_unpaid_1)
+'''
+
+data_paid_train_1, data_paid_test_1 = train_test_split(
+    user_dict_paid_1,test_size=0.20, random_state=42)
+
+data_unpaid_train_1, data_unpaid_test_1 = train_test_split(
+    user_dict_unpaid_1,test_size=0.20, random_state=42)
+'''
+print(data_paid_train_1)
+print(data_paid_test_1)
+print(len(data_paid_train_1))
+print(len(data_paid_test_1))
+'''
+
+
+headers = ['id','f1','f2','f3','f4','f5','f6','f7','f8','class']
+rows=data_paid_train_1+data_unpaid_train_1
+
+with open('data_train.csv','w') as f:
+    f_csv = csv.writer(f)
+    f_csv.writerow(headers)
+    f_csv.writerows(rows)
+    f.close()
+
+headers = ['id','f1','f2','f3','f4','f5','f6','f7','f8','class']
+rows2=data_paid_test_1+data_unpaid_test_1
+
+with open('data_test.csv','w') as f2:
+    f_csv = csv.writer(f2)
+    f_csv.writerow(headers)
+    f_csv.writerows(rows2)
+    f2.close()
+
+
+
+'''
 user_dict_paid = []
 user_dict_unpaid = []
 i = 0
@@ -124,38 +208,41 @@ for user_id in user_dict:
     if user_dict[user_id].target_label == 1:
         user_dict_paid.append({})
         user_dict_paid[i]["userid"] = user_id
-        user_dict_paid[i]["features:"] = {}
-        user_dict_paid[i]["target_label:"] = 1
-        user_dict_paid[i]["features:"]["领取了7日登陆礼包"] = user_dict[user_id].action1_count
-        user_dict_paid[i]["features:"]["领取了等级礼包"] = user_dict[user_id].action2_count
-        user_dict_paid[i]["features:"]["领取了在线奖励"] = user_dict[user_id].action3_count
-        user_dict_paid[i]["features:"]["领取了每日充值活动奖励"] = user_dict[user_id].action4_count
-        user_dict_paid[i]["features:"]["进行了金币大满贯抽取"] = user_dict[user_id].action5_count
-        user_dict_paid[i]["features:"]["进行积分抽卡"] = user_dict[user_id].action6_count
-        user_dict_paid[i]["features:"]["等级限时特卖购买道具"] = user_dict[user_id].action7_count
-        user_dict_paid[i]["features:"]["领取了充值返利活动奖励"] = user_dict[user_id].action8_count
+        user_dict_paid[i]["features"] = {}
+        user_dict_paid[i]["target_label"] = 1
+        user_dict_paid[i]["features"]["领取了7日登陆礼包"] = user_dict[user_id].action1_count
+        user_dict_paid[i]["features"]["领取了等级礼包"] = user_dict[user_id].action2_count
+        user_dict_paid[i]["features"]["领取了在线奖励"] = user_dict[user_id].action3_count
+        user_dict_paid[i]["features"]["领取了每日充值活动奖励"] = user_dict[user_id].action4_count
+        user_dict_paid[i]["features"]["进行了金币大满贯抽取"] = user_dict[user_id].action5_count
+        user_dict_paid[i]["features"]["进行积分抽卡"] = user_dict[user_id].action6_count
+        user_dict_paid[i]["features"]["等级限时特卖购买道具"] = user_dict[user_id].action7_count
+        user_dict_paid[i]["features"]["领取了充值返利活动奖励"] = user_dict[user_id].action8_count
         i+=1
     else:
         user_dict_unpaid.append({})
         user_dict_unpaid[j]["userid"] = user_id
-        user_dict_unpaid[j]["features:"] = {}
-        user_dict_unpaid[j]["target_label:"] = 0
-        user_dict_unpaid[j]["features:"]["领取了7日登陆礼包"] = user_dict[user_id].action1_count
-        user_dict_unpaid[j]["features:"]["领取了等级礼包"] = user_dict[user_id].action2_count
-        user_dict_unpaid[j]["features:"]["领取了在线奖励"] = user_dict[user_id].action3_count
-        user_dict_unpaid[j]["features:"]["领取了每日充值活动奖励"] = user_dict[user_id].action4_count
-        user_dict_unpaid[j]["features:"]["进行了金币大满贯抽取"] = user_dict[user_id].action5_count
-        user_dict_unpaid[j]["features:"]["进行积分抽卡"] = user_dict[user_id].action6_count
-        user_dict_unpaid[j]["features:"]["等级限时特卖购买道具"] = user_dict[user_id].action7_count
-        user_dict_unpaid[j]["features:"]["领取了充值返利活动奖励"] = user_dict[user_id].action8_count
+        user_dict_unpaid[j]["features"] = {}
+        user_dict_unpaid[j]["target_label"] = 0
+        user_dict_unpaid[j]["features"]["领取了7日登陆礼包"] = user_dict[user_id].action1_count
+        user_dict_unpaid[j]["features"]["领取了等级礼包"] = user_dict[user_id].action2_count
+        user_dict_unpaid[j]["features"]["领取了在线奖励"] = user_dict[user_id].action3_count
+        user_dict_unpaid[j]["features"]["领取了每日充值活动奖励"] = user_dict[user_id].action4_count
+        user_dict_unpaid[j]["features"]["进行了金币大满贯抽取"] = user_dict[user_id].action5_count
+        user_dict_unpaid[j]["features"]["进行积分抽卡"] = user_dict[user_id].action6_count
+        user_dict_unpaid[j]["features"]["等级限时特卖购买道具"] = user_dict[user_id].action7_count
+        user_dict_unpaid[j]["features"]["领取了充值返利活动奖励"] = user_dict[user_id].action8_count
         j=j+1
 
 
 
 with open('action_paid.json', 'w') as f:
     json.dump(user_dict_paid, f, ensure_ascii=False, indent=2)
-
-with open('action_unpaid.json', 'w') as f:
-    json.dump(user_dict_unpaid, f, ensure_ascii=False, indent=2)
+    f.close()
 
 
+with open('action_unpaid.json', 'w') as f2:
+    json.dump(user_dict_unpaid, f2, ensure_ascii=False, indent=2)
+    f2.close()
+
+'''
