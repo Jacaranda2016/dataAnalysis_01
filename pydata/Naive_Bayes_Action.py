@@ -36,14 +36,25 @@ X_test = np.array(df2.drop(['class'], 1))
 Y_test= np.array(df2['class'])
 
 
+
 #manually split already done
 #X_trian, X_test, Y_train, Y_test = cross_validation.train_test_split(X, Y, test_size=0.2)
 
-clf = neighbors.KNeighborsClassifier()
-clf.fit(X_train, Y_train)
 
-accuracy = clf.score(X_test, Y_test)
+
+
+clf=GaussianNB().fit(X_train,Y_train)
+Y_predict=clf.predict(X_test)
+#print(Y_test)
+count_right=0
+if len(Y_test)==len(Y_predict):
+	for i in range(0,len(Y_test)):
+		if Y_predict[i]==Y_test[i]:
+			count_right+=1
+
+accuracy= float(count_right)/float(len(Y_predict))
 print(accuracy)
+
 
 
 
